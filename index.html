@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="zh-TW" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>即時幣值轉換器 | Premium Currency Converter & FX Tracker</title>
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Custom Styles -->
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <div class="app-container">
+    <!-- Header -->
+    <header class="app-header">
+      <div class="logo-group">
+        <div class="logo-icon">
+          <i class="fa-solid fa-coins"></i>
+        </div>
+        <div class="logo-text">
+          <h1>匯率轉換器 <span>FX PRO</span></h1>
+          <p class="subtitle">即時國際匯率計算與走勢分析</p>
+        </div>
+      </div>
+      
+      <div class="header-actions">
+        <div class="status-badge" id="rateStatusBadge">
+          <span class="status-dot pulse"></span>
+          <span id="statusText">即時連線中</span>
+        </div>
+        <button class="theme-toggle-btn" id="themeToggleBtn" aria-label="切換主題">
+          <i class="fa-solid fa-moon moon-icon"></i>
+          <i class="fa-solid fa-sun sun-icon"></i>
+        </button>
+      </div>
+    </header>
+
+    <!-- Main Content Layout -->
+    <main class="main-layout">
+      <!-- Main Column (Converter + Chart) -->
+      <section class="primary-column">
+        <!-- Converter Card -->
+        <div class="glass-card converter-card">
+          <div class="card-header">
+            <h2><i class="fa-solid fa-calculator"></i> 幣值對換</h2>
+            <span class="update-time" id="lastUpdatedTime"><i class="fa-regular fa-clock"></i> 更新時間: 載入中...</span>
+          </div>
+
+          <div class="converter-body">
+            <!-- Amount Input & Presets -->
+            <div class="input-group">
+              <label for="amountInput">轉換金額</label>
+              <div class="amount-input-wrapper">
+                <span class="currency-symbol-badge" id="fromSymbolBadge">$</span>
+                <input type="number" id="amountInput" value="100" min="0" step="any" placeholder="請輸入金額">
+                <button class="clear-btn" id="clearAmountBtn" title="清除"><i class="fa-solid fa-xmark"></i></button>
+              </div>
+              <div class="preset-pills">
+                <button class="pill" data-amount="100">$100</button>
+                <button class="pill" data-amount="500">$500</button>
+                <button class="pill" data-amount="1000">$1,000</button>
+                <button class="pill" data-amount="5000">$5,000</button>
+                <button class="pill" data-amount="10000">$10,000</button>
+              </div>
+            </div>
+
+            <!-- Currency Selectors with Swap -->
+            <div class="currency-select-row">
+              <!-- From Currency Picker -->
+              <div class="currency-picker-wrapper">
+                <label>來源幣別 (From)</label>
+                <button class="currency-picker-btn" id="fromPickerBtn" type="button">
+                  <div class="picker-info">
+                    <span class="flag-icon" id="fromFlag">🇺🇸</span>
+                    <div class="currency-names">
+                      <span class="currency-code" id="fromCode">USD</span>
+                      <span class="currency-name" id="fromName">美元 (US Dollar)</span>
+                    </div>
+                  </div>
+                  <i class="fa-solid fa-chevron-down caret-icon"></i>
+                </button>
+              </div>
+
+              <!-- Swap Button -->
+              <div class="swap-button-container">
+                <button class="swap-btn" id="swapBtn" title="對調幣別">
+                  <i class="fa-solid fa-arrow-right-arrow-left"></i>
+                </button>
+              </div>
+
+              <!-- To Currency Picker -->
+              <div class="currency-picker-wrapper">
+                <label>目標幣別 (To)</label>
+                <button class="currency-picker-btn" id="toPickerBtn" type="button">
+                  <div class="picker-info">
+                    <span class="flag-icon" id="toFlag">🇹🇼</span>
+                    <div class="currency-names">
+                      <span class="currency-code" id="toCode">TWD</span>
+                      <span class="currency-name" id="toName">新台幣 (Taiwan Dollar)</span>
+                    </div>
+                  </div>
+                  <i class="fa-solid fa-chevron-down caret-icon"></i>
+                </button>
+              </div>
+            </div>
+
+            <!-- Result Display -->
+            <div class="result-box">
+              <div class="result-main">
+                <span class="result-label">估算結果</span>
+                <div class="result-number-group">
+                  <span class="result-amount" id="resultAmount">0.00</span>
+                  <span class="result-code" id="resultCurrencyCode">TWD</span>
+                </div>
+              </div>
+              <div class="rate-details">
+                <div class="rate-item">
+                  <span class="rate-title">當前匯率</span>
+                  <span class="rate-value" id="exchangeRateDetail">1 USD = -- TWD</span>
+                </div>
+                <div class="rate-item">
+                  <span class="rate-title">反向匯率</span>
+                  <span class="rate-value" id="inverseRateDetail">1 TWD = -- USD</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Trend Chart Card -->
+        <div class="glass-card chart-card">
+          <div class="card-header">
+            <div class="header-title">
+              <h2><i class="fa-solid fa-chart-line"></i> 歷史匯率走勢</h2>
+              <span class="chart-pair-badge" id="chartPairBadge">USD / TWD</span>
+            </div>
+            <div class="range-selector">
+              <button class="range-btn active" data-range="7d">7天</button>
+              <button class="range-btn" data-range="30d">30天</button>
+              <button class="range-btn" data-range="90d">90天</button>
+            </div>
+          </div>
+
+          <div class="chart-metrics">
+            <div class="metric-item">
+              <span class="metric-label">最高價 (High)</span>
+              <span class="metric-value text-green" id="highMetric">--</span>
+            </div>
+            <div class="metric-item">
+              <span class="metric-label">最低價 (Low)</span>
+              <span class="metric-value text-red" id="lowMetric">--</span>
+            </div>
+            <div class="metric-item">
+              <span class="metric-label">平均價 (Avg)</span>
+              <span class="metric-value" id="avgMetric">--</span>
+            </div>
+          </div>
+
+          <div class="canvas-container">
+            <canvas id="trendChart"></canvas>
+          </div>
+        </div>
+      </section>
+
+      <!-- Sidebar Column (Matrix & Favorites) -->
+      <aside class="secondary-column">
+        <!-- Multi-Currency Matrix Card -->
+        <div class="glass-card matrix-card">
+          <div class="card-header">
+            <h2><i class="fa-solid fa-globe"></i> 常用匯率對照表</h2>
+            <button class="refresh-btn" id="refreshRatesBtn" title="重新整理匯率">
+              <i class="fa-solid fa-rotate"></i>
+            </button>
+          </div>
+
+          <div class="matrix-search">
+            <i class="fa-solid fa-magnifying-glass search-icon"></i>
+            <input type="text" id="matrixSearchInput" placeholder="搜尋對照幣別...">
+          </div>
+
+          <div class="matrix-list-wrapper">
+            <ul class="matrix-list" id="matrixList">
+              <!-- Dynamically populated -->
+            </ul>
+          </div>
+        </div>
+      </aside>
+    </main>
+
+    <!-- Footer -->
+    <footer class="app-footer">
+      <p>© 2026 匯率轉換器 FX PRO | 數據更新自公開匯率 API | 本數據僅供參考</p>
+    </footer>
+  </div>
+
+  <!-- Currency Selection Modal -->
+  <div class="modal-overlay" id="currencyModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3><i class="fa-solid fa-coins"></i> 選擇貨幣</h3>
+        <button class="modal-close-btn" id="modalCloseBtn"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+
+      <div class="modal-search">
+        <i class="fa-solid fa-magnifying-glass search-icon"></i>
+        <input type="text" id="modalSearchInput" placeholder="輸入幣別代碼或名稱 (如 USD, 台幣, 日圓)...">
+      </div>
+
+      <div class="modal-body">
+        <div class="currency-group-title">熱門幣別</div>
+        <div class="popular-currencies-grid" id="popularGrid">
+          <!-- Dynamically populated pills -->
+        </div>
+
+        <div class="currency-group-title">所有貨幣</div>
+        <ul class="currency-list" id="modalCurrencyList">
+          <!-- Dynamically populated list items -->
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
